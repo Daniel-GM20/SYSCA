@@ -48,8 +48,7 @@ const rouletteNumbers = [
 export default function Roulette({ onBack }: RouletteProps) {
   const [balance, setBalance] = useState(1000);
   const [bet, setBet] = useState(10);
-  const [betType, setBetType] = useState<'red' | 'black' | 'number' | null>(null);
-  const [betNumber, setBetNumber] = useState<number | null>(null);
+  const [betType, setBetType] = useState<'red' | 'black' | null>(null);
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState<typeof rouletteNumbers[0] | null>(null);
   const [rotation, setRotation] = useState(0);
@@ -72,8 +71,9 @@ export default function Roulette({ onBack }: RouletteProps) {
 
     const randomIndex = Math.floor(Math.random() * rouletteNumbers.length);
     const winningNumber = rouletteNumbers[randomIndex];
-    const spins = 5 + Math.random() * 3;
-    const finalRotation = rotation + 360 * spins + (randomIndex * (360 / rouletteNumbers.length));
+    const spins = 8 + Math.random() * 4;
+    const degreesPerSlot = 360 / rouletteNumbers.length;
+    const finalRotation = rotation + 360 * spins + (randomIndex * degreesPerSlot);
 
     setRotation(finalRotation);
 
@@ -84,134 +84,220 @@ export default function Roulette({ onBack }: RouletteProps) {
       let won = false;
       let winAmount = 0;
 
-      if (betType === 'number' && betNumber === winningNumber.number) {
-        won = true;
-        winAmount = bet * 35;
-      } else if (betType === winningNumber.color) {
+      if (betType === winningNumber.color) {
         won = true;
         winAmount = bet * 2;
       }
 
       if (won) {
         setBalance((prev) => prev + winAmount);
-        setMessage(`¡Ganaste $${winAmount}! Número: ${winningNumber.number} ${winningNumber.color}`);
+        setMessage(`¡GANASTE! $${winAmount} - Número: ${winningNumber.number}`);
       } else {
-        setMessage(`Perdiste. Número: ${winningNumber.number} ${winningNumber.color}`);
+        setMessage(`Perdiste. Número: ${winningNumber.number}`);
       }
-    }, 4000);
+    }, 5500);
   };
 
   return (
-    <div className="min-h-screen py-10 bg-gradient-to-b from-black via-red-950/20 to-black">
-      <div className="max-w-6xl mx-auto px-4">
+    <div className="min-h-screen py-10 bg-gradient-to-b from-black to-black">
+      <div className="max-w-7xl mx-auto px-4">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-yellow-500 hover:text-yellow-400 mb-6 transition-colors"
+          className="flex items-center gap-2 text-yellow-500 hover:text-yellow-400 mb-8 transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />
           Volver a Juegos
         </button>
 
-        <div className="bg-gradient-to-br from-gray-900 to-black border border-red-600/30 rounded-xl p-8">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-yellow-500">Ruleta Europea</h2>
-            <div className="flex items-center gap-2 text-2xl font-bold text-white">
-              <Coins className="h-6 w-6 text-yellow-500" />
-              ${balance}
+        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <div className="bg-gradient-to-b from-slate-900 to-black rounded-2xl p-12 border border-yellow-600/30 shadow-2xl">
+              <h2 className="text-4xl font-bold text-yellow-500 mb-2 text-center">RULETA EUROPEA</h2>
+              <p className="text-center text-gray-400 mb-8">La experiencia de casino más emocionante</p>
+
+              <div className="flex justify-center mb-12">
+                <div className="relative w-96 h-96">
+                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 400 400">
+                    <defs>
+                      <filter id="glow">
+                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                        <feMerge>
+                          <feMergeNode in="coloredBlur"/>
+                          <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                      </filter>
+                    </defs>
+
+                    <circle cx="200" cy="200" r="195" fill="#1a1a2e" stroke="#d4af37" strokeWidth="3"/>
+                    <circle cx="200" cy="200" r="185" fill="#0f0f1e"/>
+                  </svg>
+
+                  <div
+                    className="absolute inset-0 rounded-full transition-transform"
+                    style={{
+                      transform: `rotate(${rotation}deg)`,
+                      transformOrigin: 'center',
+                      transitionDuration: spinning ? '5.5s' : '0s',
+                      transitionTimingFunction: spinning ? 'cubic-bezier(0.25, 0.01, 0.25, 1)' : 'linear',
+                    }}
+                  >
+                    <svg className="w-full h-full" viewBox="0 0 400 400">
+                      {rouletteNumbers.map((num, idx) => {
+                        const angle = (idx * 360) / rouletteNumbers.length;
+                        const startAngle = angle;
+                        const endAngle = angle + 360 / rouletteNumbers.length;
+
+                        const isGreen = num.number === 0;
+                        const color = isGreen ? '#2ecc71' : num.color === 'red' ? '#e74c3c' : '#1a1a2e';
+                        const textColor = isGreen ? '#fff' : num.color === 'red' ? '#fff' : '#fff';
+
+                        const x1 = 200 + 170 * Math.cos((startAngle * Math.PI) / 180);
+                        const y1 = 200 + 170 * Math.sin((startAngle * Math.PI) / 180);
+                        const x2 = 200 + 170 * Math.cos((endAngle * Math.PI) / 180);
+                        const y2 = 200 + 170 * Math.sin((endAngle * Math.PI) / 180);
+
+                        const largeArc = 360 / rouletteNumbers.length > 180 ? 1 : 0;
+
+                        const midAngle = (startAngle + endAngle) / 2;
+                        const textRadius = 135;
+                        const textX = 200 + textRadius * Math.cos((midAngle * Math.PI) / 180);
+                        const textY = 200 + textRadius * Math.sin((midAngle * Math.PI) / 180);
+
+                        return (
+                          <g key={idx}>
+                            <path
+                              d={`M 200 200 L ${x1} ${y1} A 170 170 0 ${largeArc} 1 ${x2} ${y2} Z`}
+                              fill={color}
+                              stroke="#d4af37"
+                              strokeWidth="1"
+                              filter="url(#glow)"
+                            />
+                            <text
+                              x={textX}
+                              y={textY}
+                              textAnchor="middle"
+                              dy="0.3em"
+                              fill={textColor}
+                              fontSize="16"
+                              fontWeight="bold"
+                              fontFamily="Arial, sans-serif"
+                              pointerEvents="none"
+                            >
+                              {num.number}
+                            </text>
+                          </g>
+                        );
+                      })}
+                    </svg>
+                  </div>
+
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-gradient-to-b from-yellow-400 to-yellow-600 rounded-full border-4 border-white shadow-2xl flex items-center justify-center z-20">
+                    <div className="w-4 h-4 bg-black rounded-full"></div>
+                  </div>
+
+                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 z-30">
+                    <div className="w-0 h-0 border-l-6 border-r-6 border-t-8 border-l-transparent border-r-transparent border-t-white drop-shadow-lg"></div>
+                  </div>
+                </div>
+              </div>
+
+              {result && !spinning && (
+                <div className="text-center mb-6">
+                  <div className={`inline-block text-3xl font-bold px-8 py-4 rounded-xl ${
+                    result.number === 0 ? 'bg-green-600' :
+                    result.color === 'red' ? 'bg-red-600' :
+                    'bg-gray-900 border-2 border-white'
+                  } text-white`}>
+                    {result.number}
+                  </div>
+                </div>
+              )}
+
+              {message && (
+                <div className={`text-center text-xl font-bold px-6 py-4 rounded-lg ${
+                  message.includes('GANASTE') ? 'bg-green-600/90 text-white' : 'bg-red-600/90 text-white'
+                }`}>
+                  {message}
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="flex flex-col items-center mb-8">
-            <div className="relative w-80 h-80 mb-8">
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-900/20 to-red-900/20 rounded-full"></div>
-              <div className="absolute inset-4 bg-gradient-to-br from-gray-900 to-black rounded-full border-4 border-yellow-600"></div>
+          <div className="bg-gradient-to-b from-slate-900 to-black rounded-2xl p-8 border border-yellow-600/30 h-fit shadow-2xl">
+            <h3 className="text-2xl font-bold text-yellow-500 mb-6">Control de Apuesta</h3>
 
-              <div
-                className="absolute inset-8 rounded-full transition-transform duration-4000 ease-out"
-                style={{
-                  transform: `rotate(${rotation}deg)`,
-                  background: 'conic-gradient(from 0deg, red 0deg, black 9.73deg, red 19.46deg, black 29.19deg, red 38.92deg, black 48.65deg, red 58.38deg, black 68.11deg, red 77.84deg, black 87.57deg, red 97.30deg, black 107.03deg, red 116.76deg, black 126.49deg, red 136.22deg, black 145.95deg, red 155.68deg, black 165.41deg, red 175.14deg, black 184.87deg, red 194.60deg, black 204.33deg, red 214.06deg, black 223.79deg, red 233.52deg, black 243.25deg, red 252.98deg, black 262.71deg, red 272.44deg, black 282.17deg, red 291.90deg, black 301.63deg, red 311.36deg, black 321.09deg, red 330.82deg, black 340.55deg, red 350.28deg, green 360deg)',
-                }}
-              ></div>
-
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full border-4 border-white shadow-lg flex items-center justify-center">
-                <div className="w-3 h-3 bg-black rounded-full"></div>
-              </div>
-
-              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-12 border-l-transparent border-r-transparent border-t-white"></div>
-            </div>
-
-            {result && !spinning && (
-              <div className={`text-2xl font-bold mb-4 px-6 py-3 rounded-lg ${
-                result.color === 'red' ? 'bg-red-600' :
-                result.color === 'black' ? 'bg-gray-900 border-2 border-white' :
-                'bg-green-600'
-              }`}>
-                {result.number}
-              </div>
-            )}
-
-            {message && (
-              <div className={`text-lg font-semibold mb-4 px-6 py-3 rounded-lg ${
-                message.includes('Ganaste') ? 'bg-green-600' : 'bg-red-600'
-              }`}>
-                {message}
-              </div>
-            )}
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label className="block text-gray-400 mb-2">Monto de Apuesta</label>
-              <input
-                type="number"
-                value={bet}
-                onChange={(e) => setBet(Number(e.target.value))}
-                min="1"
-                max={balance}
-                disabled={spinning}
-                className="w-full bg-gray-800 border border-red-600/30 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-red-600"
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-400 mb-2">Tipo de Apuesta</label>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => { setBetType('red'); setBetNumber(null); }}
+            <div className="mb-6">
+              <label className="block text-gray-400 mb-3 font-semibold">Monto de Apuesta</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  value={bet}
+                  onChange={(e) => setBet(Number(e.target.value))}
+                  min="1"
+                  max={balance}
                   disabled={spinning}
-                  className={`flex-1 py-2 rounded-lg font-semibold transition-all ${
+                  className="flex-1 bg-gray-900 border-2 border-yellow-600/50 rounded-lg px-4 py-2 text-white font-bold text-lg focus:outline-none focus:border-yellow-500"
+                />
+                <span className="text-yellow-500 font-bold">$</span>
+              </div>
+            </div>
+
+            <div className="mb-8">
+              <label className="block text-gray-400 mb-3 font-semibold">Selecciona Color</label>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setBetType('red')}
+                  disabled={spinning}
+                  className={`flex-1 py-3 rounded-lg font-bold transition-all transform hover:scale-105 ${
                     betType === 'red'
-                      ? 'bg-red-600 text-white'
-                      : 'bg-gray-800 text-gray-400 hover:bg-red-600/20'
-                  }`}
+                      ? 'bg-red-600 text-white border-2 border-white shadow-lg'
+                      : 'bg-red-600/30 text-red-200 border-2 border-red-600/50 hover:bg-red-600/50'
+                  } disabled:opacity-50`}
                 >
-                  Rojo (2x)
+                  ROJO
                 </button>
                 <button
-                  onClick={() => { setBetType('black'); setBetNumber(null); }}
+                  onClick={() => setBetType('black')}
                   disabled={spinning}
-                  className={`flex-1 py-2 rounded-lg font-semibold transition-all ${
+                  className={`flex-1 py-3 rounded-lg font-bold transition-all transform hover:scale-105 ${
                     betType === 'black'
-                      ? 'bg-gray-900 text-white border-2 border-white'
-                      : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-                  }`}
+                      ? 'bg-gray-900 text-white border-2 border-white shadow-lg'
+                      : 'bg-gray-800/50 text-gray-300 border-2 border-gray-600/50 hover:bg-gray-700/50'
+                  } disabled:opacity-50`}
                 >
-                  Negro (2x)
+                  NEGRO
                 </button>
               </div>
             </div>
-          </div>
 
-          <button
-            onClick={spin}
-            disabled={spinning || !betType}
-            className="w-full py-4 bg-gradient-to-r from-yellow-500 to-red-600 text-black rounded-lg text-xl font-bold hover:from-yellow-600 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
-          >
-            {spinning ? 'Girando...' : 'GIRAR RULETA'}
-          </button>
+            <div className="mb-8 p-4 bg-yellow-600/10 border border-yellow-600/30 rounded-lg">
+              <p className="text-gray-400 text-sm mb-2"><strong>Saldo Actual:</strong></p>
+              <p className="text-3xl font-bold text-yellow-500">${balance}</p>
+            </div>
+
+            <button
+              onClick={spin}
+              disabled={spinning || !betType}
+              className="w-full py-4 bg-gradient-to-r from-yellow-500 to-yellow-600 text-black rounded-xl text-2xl font-bold hover:from-yellow-600 hover:to-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xl transform hover:scale-105 active:scale-95"
+            >
+              {spinning ? 'GIRANDO...' : 'GIRAR RULETA'}
+            </button>
+
+            <div className="mt-6 p-4 bg-gray-900/50 rounded-lg border border-gray-600/30">
+              <p className="text-xs text-gray-500 text-center">
+                Apuesta 2x tu monto en rojo o negro. Se requiere seleccionar un color antes de girar.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes pulse-glow {
+          0%, 100% { filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.5)); }
+          50% { filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.8)); }
+        }
+      `}</style>
     </div>
   );
 }

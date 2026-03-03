@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Dices, Cherry, Grid3x3 } from 'lucide-react';
+import { Dices, Cherry, Grid3x3, Grape } from 'lucide-react';
 import Roulette from './games/Roulette';
 import SlotMachine from './games/SlotMachine';
+import FruitWheel from './games/FruitWheel';
 import Bingo from './games/Bingo';
 
 export default function Games() {
-  const [selectedGame, setSelectedGame] = useState<'roulette' | 'slots' | 'bingo' | null>(null);
+  const [selectedGame, setSelectedGame] = useState<'roulette' | 'slots' | 'fruitwheel' | 'bingo' | null>(null);
 
   if (selectedGame === 'roulette') {
     return <Roulette onBack={() => setSelectedGame(null)} />;
@@ -13,6 +14,10 @@ export default function Games() {
 
   if (selectedGame === 'slots') {
     return <SlotMachine onBack={() => setSelectedGame(null)} />;
+  }
+
+  if (selectedGame === 'fruitwheel') {
+    return <FruitWheel onBack={() => setSelectedGame(null)} />;
   }
 
   if (selectedGame === 'bingo') {
@@ -62,6 +67,25 @@ export default function Games() {
               <h3 className="text-2xl font-bold text-white mb-2">Tragamonedas</h3>
               <p className="text-gray-400 mb-4">
                 Gira los rodillos y consigue combinaciones ganadoras. ¡Jackpot te espera!
+              </p>
+              <div className="flex items-center justify-between">
+                <span className="text-yellow-500 font-semibold">Jugar Ahora</span>
+                <span className="text-sm text-gray-500">Categoría: Slots</span>
+              </div>
+            </div>
+          </div>
+
+          <div
+            onClick={() => setSelectedGame('fruitwheel')}
+            className="group bg-gradient-to-br from-gray-900 to-black border border-red-600/30 rounded-xl overflow-hidden cursor-pointer transform hover:scale-105 transition-all hover:border-red-600"
+          >
+            <div className="h-48 bg-gradient-to-br from-purple-900/30 to-black flex items-center justify-center">
+              <Grape className="h-24 w-24 text-purple-500 group-hover:scale-110 transition-transform" />
+            </div>
+            <div className="p-6">
+              <h3 className="text-2xl font-bold text-white mb-2">Ruleta de Frutas</h3>
+              <p className="text-gray-400 mb-4">
+                Apuesta por tus frutas favoritas y gana en la ruleta de frutas giratoria.
               </p>
               <div className="flex items-center justify-between">
                 <span className="text-yellow-500 font-semibold">Jugar Ahora</span>
