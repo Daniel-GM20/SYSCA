@@ -1,3 +1,7 @@
 {
-  "mcpServers": {}
+  "mcpServers": {
+    "suite_crm": {
+      "enabled": false
+    }
+  }
 }
